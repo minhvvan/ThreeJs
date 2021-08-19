@@ -85,7 +85,7 @@ for (let index = 0; index < array.length; index++) {
         const y = array[index+1]
         const z = array[index+2]
     
-        array[index] = x + (Math.random() -0.5) * 10
+        array[index] = x + (Math.random() -0.5) * 11
         array[index + 1] = y + (Math.random() -0.5) * 30
         array[index+2] = z + (Math.random() -0.5) * 30
     }
