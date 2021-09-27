@@ -1,0 +1,45 @@
+*
+{
+    margin: 0;
+    padding: 0;
+}
+
+html,
+body
+{
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.webgl
+{
+    position: fixed;
+    top: 0;
+    left: 0;
+    outline: none;
+    z-index: -1;
+}
+
+h1{
+    position: absolute;
+    color: #ffffff;
+    z-index: 1;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 90px;
+    text-align: center;
+    align-self: center;
+    margin-top: 450px;
+}
+/* 
+h1{
+    position: absolute;
+    color: #ffffff;
+    z-index: 1;
+    font-family: 'Times New Roman', Times, serif;
+    font-size: 70px;
+    text-align: center;
+    align-self: center;
+    margin-top: 670px;
+    margin-left: 480px;
+} */
