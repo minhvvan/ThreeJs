@@ -59,17 +59,20 @@ const woodMaterial = new THREE.MeshBasicMaterial({map: woodTexture})
 const metalMaterial = new THREE.MeshBasicMaterial({map: metalTexture})
 
 
+
 //Model
+let woodMesh
 gltfLoader.load(
     'treasureBox.glb',
     (gltf) => {
         gltf.scene.traverse((child) => {
             child.material = metalMaterial
         })
-        const woodMesh = gltf.scene.children.find((child) => child.name === 'wood')
+        woodMesh = gltf.scene.children.find((child) => child.name === 'wood')
         woodMesh.material = woodMaterial
 
         scene.add(gltf.scene)
+        console.log(scene.children);
     }
 )
 
@@ -107,13 +110,7 @@ gui.add(firefliesMaterial.uniforms.uSize, 'value').min(0).max(500).step(1).name(
 
 //Points
 const fireflies = new THREE.Points(firefliesGeometry, firefliesMaterial) 
-scene.add(fireflies)
-
-
-//NOTE Light
-const Light1 = new THREE.PointLight(new THREE.Color('#2a2a2d'),100)
-Light1.position.set(0,3,5)
-scene.add(Light1)
+// scene.add(fireflies)
 
 
 /**
@@ -141,6 +138,25 @@ window.addEventListener('resize', () =>
     //Update fireflies
     firefliesMaterial.uniforms.uPixelRatio.value = Math.min(window.devicePixelRatio, 2)
 })
+
+//NOTE raycast
+const raycaster = new THREE.Raycaster();
+const mouse = new THREE.Vector2();
+
+function onMouseMove( event ) {
+
+	// calculate mouse position in normalized device coordinates
+	// (-1 to +1) for both components
+
+	mouse.x = ( event.clientX / window.innerWidth ) * 2 - 1;
+	mouse.y = - ( event.clientY / window.innerHeight ) * 2 + 1;
+
+}
+
+
+window.addEventListener( 'mousemove', onMouseMove, false );
+
+
 
 /**
  * Camera
@@ -174,17 +190,45 @@ gui.addColor(debudObject,'clearColor').onChange( () => {
 })
 
 
+let open = false
+//NOTE onclick
+renderer.domElement.addEventListener("click", () => {
+    if(intersects.length > 0 && intersects[0].object.type === 'Mesh'){
+        if(open){
+            open = false
+        }else{
+            open = true
+        }
+        console.log(`open: ${open}`);
+    }
+
+
+});
+
+
 /**
  * Animate
  */
 const clock = new THREE.Clock()
-
+let intersects
 const tick = () =>
 {
     const elapsedTime = clock.getElapsedTime()
 
     //Update shader
     firefliesMaterial.uniforms.uTime.value = elapsedTime
+
+    //raycaster
+    if(woodMesh){
+	    raycaster.setFromCamera( mouse, camera );
+
+        intersects = raycaster.intersectObjects(scene.children, true)
+
+
+    }
+
+
+	renderer.render( scene, camera );
 
     // Update controls
     controls.update()
@@ -195,5 +239,6 @@ const tick = () =>
     // Call tick again on the next frame
     window.requestAnimationFrame(tick)
 }
+
 
 tick()
