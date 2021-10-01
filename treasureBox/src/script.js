@@ -47,34 +47,52 @@ gltfLoader.setDRACOLoader(dracoLoader)
 
 
 //Texture
-const woodTexture = textureLoader.load('wood.jpg')
-woodTexture.flipY = false
-woodTexture.encoding = THREE.sRGBEncoding
+const topTexture = textureLoader.load('topBake.jpg')
+topTexture.flipY = false
+topTexture.encoding = THREE.sRGBEncoding
 
-const metalTexture = textureLoader.load('metal.jpg')
-metalTexture.flipY = false
-metalTexture.encoding = THREE.sRGBEncoding
+const bottomTexture = textureLoader.load('bottomBake.jpg')
+bottomTexture.flipY = false
+bottomTexture.encoding = THREE.sRGBEncoding
 
-const woodMaterial = new THREE.MeshBasicMaterial({map: woodTexture})
-const metalMaterial = new THREE.MeshBasicMaterial({map: metalTexture})
+const topMaterial = new THREE.MeshBasicMaterial({map: topTexture})
+const bottomMaterial = new THREE.MeshBasicMaterial({map: bottomTexture})
 
 
 
 //Model
-let woodMesh
+let topMesh
+let action1
+let mixer
 gltfLoader.load(
     'treasureBox.glb',
     (gltf) => {
-        gltf.scene.traverse((child) => {
-            child.material = metalMaterial
-        })
-        woodMesh = gltf.scene.children.find((child) => child.name === 'wood')
-        woodMesh.material = woodMaterial
+        console.log(gltf.scene.children);
 
+        topMesh = gltf.scene.children.find((child) => child.name === 'Top')
+        console.log(topMesh.children);
+        topMesh.traverse((chlid) => {
+            chlid.material = topMaterial
+        })
+
+        const bottomMesh = gltf.scene.children.find((child) => child.name === 'Bottom')
+
+        bottomMesh.traverse((chlid) => {
+            chlid.material = bottomMaterial
+        })
+
+
+
+        mixer = new THREE.AnimationMixer(gltf.scene);
+        const clip1 = gltf.animations[0];
+        action1 = mixer.clipAction(clip1);
+        action1.clampWhenFinished = true
+        action1.setLoop(THREE.LoopOnce)
         scene.add(gltf.scene)
         console.log(scene.children);
     }
 )
+
 
 //NOTE Fireflies
 //geo
@@ -198,6 +216,7 @@ renderer.domElement.addEventListener("click", () => {
             open = false
         }else{
             open = true
+            action1.play();
         }
         console.log(`open: ${open}`);
     }
@@ -213,18 +232,23 @@ const clock = new THREE.Clock()
 let intersects
 const tick = () =>
 {
-    const elapsedTime = clock.getElapsedTime()
+    // const elapsedTime = clock.getElapsedTime()
+    let dt = clock.getDelta()
 
     //Update shader
-    firefliesMaterial.uniforms.uTime.value = elapsedTime
+    // firefliesMaterial.uniforms.uTime.value = elapsedTime
 
     //raycaster
-    if(woodMesh){
+    if(topMesh){
 	    raycaster.setFromCamera( mouse, camera );
 
         intersects = raycaster.intersectObjects(scene.children, true)
 
+    }
 
+    //animation
+    if(mixer){
+        mixer.update(dt);
     }
 
 
